@@ -15,6 +15,10 @@ $registrationSuccess = $_SESSION['registration_success'] ?? '';
 if (isset($_SESSION['registration_error'])) unset($_SESSION['registration_error']);
 if (isset($_SESSION['registration_success'])) unset($_SESSION['registration_success']);
 
+// Structured form errors and persisted values (step-scoped)
+$formErrors = $_SESSION['form_errors'] ?? null;
+if (isset($_SESSION['form_errors'])) unset($_SESSION['form_errors']);
+
 require_once __DIR__ . '/csrf.php';
 ?>
 
@@ -816,6 +820,7 @@ require_once __DIR__ . '/csrf.php';
             background: rgba(220, 38, 38, 0.05);
             box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.1);
         }
+        .field-error { color: #dc2626; font-size: 12px; margin-top: 4px; }
         
         .registration-input.valid {
             border-color: #059669;
@@ -1065,7 +1070,7 @@ require_once __DIR__ . '/csrf.php';
                 <h3 class="registration-title">Welcome to NEUST</h3>
                 <div class="registration-sub">Create your account and unlock access to all student services and resources</div>
                 
-                <?php if (!empty($registrationError)): ?>
+                <?php if (!empty($registrationError) && empty($formErrors)): ?>
                     <div class="error-message">
                         <i class="fas fa-exclamation-circle"></i>
                         <?= htmlspecialchars($registrationError) ?>
@@ -1079,7 +1084,7 @@ require_once __DIR__ . '/csrf.php';
                     </div>
                 <?php endif; ?>
                 
-                <form class="registration-form" method="POST" action="process_register.php" id="registrationForm">
+                <form class="registration-form" method="POST" action="process_register.php" id="registrationForm" <?php if (!empty($formErrors) && ($formErrors['source'] ?? '') === 'registration_modal'): ?>data-initial-step="<?= (int)($formErrors['step'] ?? 1) ?>"<?php endif; ?>>
                     <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
                     <input type="hidden" name="source" value="registration_modal">
                     
@@ -1139,7 +1144,7 @@ require_once __DIR__ . '/csrf.php';
                         
                         <div class="form-row">
                             <div class="form-group">
-                                <select class="registration-input" name="year_level" required aria-label="Year Level">
+                                <select class="registration-input" name="year" required aria-label="Year Level">
                                     <option value="">Select Year Level</option>
                                     <option value="1st Year">1st Year</option>
                                     <option value="2nd Year">2nd Year</option>
@@ -1210,7 +1215,7 @@ require_once __DIR__ . '/csrf.php';
                         
                         <div class="form-group">
                             <div class="input-wrap">
-                                <input class="registration-input" type="password" id="confirmPassword" placeholder="Confirm Password" required aria-label="Confirm Password" autocomplete="new-password">
+                                <input class="registration-input" type="password" id="confirmPassword" name="confirmPassword" placeholder="Confirm Password" required aria-label="Confirm Password" autocomplete="new-password">
                                 <button type="button" class="password-toggle" data-target="confirmPassword" aria-label="Show password">
                                     <i class="fas fa-eye"></i>
                                 </button>
@@ -1242,17 +1247,7 @@ require_once __DIR__ . '/csrf.php';
                         </button>
                     </div>
                     
-                    <div class="registration-socials" aria-label="Social register">
-                        <a href="#" aria-label="Sign up with Google" title="Continue with Google">
-                            <i class="fa-brands fa-google"></i>
-                        </a>
-                        <a href="#" aria-label="Sign up with Facebook" title="Continue with Facebook">
-                            <i class="fa-brands fa-facebook-f"></i>
-                        </a>
-                        <a href="#" aria-label="Sign up with Apple" title="Continue with Apple">
-                            <i class="fa-brands fa-apple"></i>
-                        </a>
-                    </div>
+                    <!-- Social registration removed for a cleaner, professional look -->
                     
                     <div class="registration-switch-text">
                         Already have an account? <a href="#" id="goToLogin" class="registration-switch-link">Sign in here</a>
@@ -1282,6 +1277,43 @@ require_once __DIR__ . '/csrf.php';
             const prevBtn = document.getElementById('prevBtn');
             const submitBtn = document.getElementById('submitBtn');
             
+            // Initialize with server-provided step if exists
+            const initialStepAttr = form.getAttribute('data-initial-step');
+            if (initialStepAttr) {
+                const s = parseInt(initialStepAttr, 10);
+                if (!isNaN(s) && s >= 1 && s <= totalSteps) currentStep = s;
+            }
+
+            // Apply server-side field errors and persisted values
+            <?php if (!empty($formErrors) && ($formErrors['source'] ?? '') === 'registration_modal'): ?>
+            const serverErrors = <?= json_encode($formErrors['fields'] ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
+            const serverValues = <?= json_encode($formErrors['values'] ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
+            Object.keys(serverValues || {}).forEach(function(name){
+                const field = form.querySelector('[name="' + name + '"]');
+                if (!field) return;
+                if (field.tagName === 'SELECT' || field.type === 'text' || field.type === 'email' || field.type === 'tel' || field.type === 'date') {
+                    field.value = serverValues[name];
+                } else if (field.tagName === 'TEXTAREA') {
+                    field.textContent = serverValues[name];
+                }
+            });
+            Object.keys(serverErrors || {}).forEach(function(name){
+                const field = form.querySelector('[name="' + name + '"]');
+                if (!field) return;
+                field.classList.add('error');
+                let holder = field.parentNode;
+                if (holder) {
+                    let e = holder.querySelector('.field-error');
+                    if (!e) {
+                        e = document.createElement('div');
+                        e.className = 'field-error';
+                        holder.appendChild(e);
+                    }
+                    e.textContent = serverErrors[name];
+                }
+            });
+            <?php endif; ?>
+
             // Multi-step form functions
             function updateStepDisplay() {
                 // Update form steps
@@ -1361,10 +1393,10 @@ require_once __DIR__ . '/csrf.php';
             progressSteps.forEach((step, index) => {
                 step.addEventListener('click', function() {
                     const stepNumber = parseInt(this.getAttribute('data-step'));
-                    if (stepNumber <= currentStep || this.classList.contains('completed')) {
+                    if (stepNumber <= currentStep) {
                         currentStep = stepNumber;
                         updateStepDisplay();
-                    }
+                    } else if (validateCurrentStep()) { currentStep = stepNumber; updateStepDisplay(); }
                 });
             });
             
@@ -1382,7 +1414,12 @@ require_once __DIR__ . '/csrf.php';
                 }
             });
             
-            // Initialize step display
+            // Initialize with server-provided step
+            const initialStepAttr = form.getAttribute('data-initial-step');
+            if (initialStepAttr) {
+                const s = parseInt(initialStepAttr, 10);
+                if (!isNaN(s) && s >= 1 && s <= totalSteps) currentStep = s;
+            }
             updateStepDisplay();
             
             // Password toggle functionality
