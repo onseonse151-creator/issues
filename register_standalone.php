@@ -73,10 +73,10 @@ if (isset($_SESSION['landing_error'])) unset($_SESSION['landing_error']);
 							<div class="step" data-step="3"></div>
 							<div class="step" data-step="4"></div>
 						</div>
-						<div class="step-indicators" style="display:flex; justify-content:space-between;">
+						<div class="step-indicators" style="display:flex; justify-content:space-between; gap:12px;">
 							<div class="step-indicator active" data-step="1"><i class="fas fa-user"></i><span>Personal</span></div>
-							<div class="step-indicator" data-step="2"><i class="fas fa-phone"></i><span>Contact</span></div>
-							<div class="step-indicator" data-step="3"><i class="fas fa-users"></i><span>Family</span></div>
+							<div class="step-indicator" data-step="2"><i class="fas fa-graduation-cap"></i><span>Academic</span></div>
+							<div class="step-indicator" data-step="3"><i class="fas fa-phone"></i><span>Contact</span></div>
 							<div class="step-indicator" data-step="4"><i class="fas fa-lock"></i><span>Security</span></div>
 						</div>
 					</div>
@@ -94,7 +94,7 @@ if (isset($_SESSION['landing_error'])) unset($_SESSION['landing_error']);
 								</div>
 								<div class="form-group">
 									<label for="biologicalSex" class="form-label required">Biological Sex</label>
-									<select id="biologicalSex" name="biologicalSex" class="form-select" required>
+									<select id="biologicalSex" name="biological_sex" class="form-select" required>
 										<option value="">Select Biological Sex</option>
 										<option value="Male">Male</option>
 										<option value="Female">Female</option>
@@ -106,15 +106,15 @@ if (isset($_SESSION['landing_error'])) unset($_SESSION['landing_error']);
 								</div>
 								<div class="form-group">
 									<label for="lastName" class="form-label required">Last Name</label>
-									<input type="text" id="lastName" name="lastName" class="form-input" placeholder="Enter your last name" required>
+									<input type="text" id="lastName" name="last_name" class="form-input" placeholder="Enter your last name" required>
 								</div>
 								<div class="form-group">
 									<label for="middleName" class="form-label">Middle Name</label>
-									<input type="text" id="middleName" name="middleName" class="form-input" placeholder="Enter your middle name">
+									<input type="text" id="middleName" name="middle_name" class="form-input" placeholder="Enter your middle name">
 								</div>
 								<div class="form-group">
 									<label for="birthDate" class="form-label required">Birth Date</label>
-									<input type="date" id="birthDate" name="birthDate" class="form-input" required>
+									<input type="date" id="birthDate" name="birth_date" class="form-input" required>
 								</div>
 								<div class="form-group">
 									<label for="nationality" class="form-label required">Nationality</label>
@@ -155,11 +155,11 @@ if (isset($_SESSION['landing_error'])) unset($_SESSION['landing_error']);
 								</div>
 								<div class="form-group">
 									<label for="currentAddress" class="form-label required">Current Address</label>
-									<input type="text" id="currentAddress" name="currentAddress" class="form-input" placeholder="Enter your current address" required>
+									<input type="text" id="currentAddress" name="current_address" class="form-input" placeholder="Enter your current address" required>
 								</div>
 								<div class="form-group">
 									<label for="permanentAddress" class="form-label required">Permanent Address</label>
-									<input type="text" id="permanentAddress" name="permanentAddress" class="form-input" placeholder="Enter your permanent address" required>
+									<input type="text" id="permanentAddress" name="permanent_address" class="form-input" placeholder="Enter your permanent address" required>
 								</div>
 							</div>
 							<div class="form-actions">
@@ -225,7 +225,7 @@ if (isset($_SESSION['landing_error'])) unset($_SESSION['landing_error']);
 								<div class="form-group full-width">
 									<label for="confirmPassword" class="form-label required">Confirm Password</label>
 									<div class="input-wrap">
-										<input type="password" id="confirmPassword" class="form-input" placeholder="Confirm your password" required>
+										<input type="password" id="confirmPassword" name="confirmPassword" class="form-input" placeholder="Confirm your password" required>
 										<button type="button" class="eye" data-eye="confirmPassword" aria-label="Show password"><i class="fas fa-eye"></i></button>
 									</div>
 									<div class="error-message" id="passwordMatchError" style="display: none;">
@@ -238,7 +238,7 @@ if (isset($_SESSION['landing_error'])) unset($_SESSION['landing_error']);
 								<button type="button" class="btn btn-ghost prev" id="prevBtn4"><i class="fas fa-arrow-left"></i> Previous</button>
 								<button type="submit" class="btn btn-primary" id="submitBtn"><i class="fas fa-user-plus"></i> Create Account</button>
 							</div>
-							<div style="margin-top:8px;text-align:center">Have an account? <a href="landing_page.php?open=login" style="text-decoration:underline;">Sign in</a></div>
+							<div style="margin-top:16px;text-align:center">Have an account? <a href="landing_page.php?open=login" style="text-decoration:underline;">Sign in</a></div>
 						</div>
 					</form>
 				</div>

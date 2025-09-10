@@ -1,4 +1,4 @@
-<?php 
+THIS SHOULD BE A LINTER ERROR<?php 
 session_start();
 require_once __DIR__ . '/csrf.php';
 
@@ -18,6 +18,7 @@ if ($conn->connect_error) {
 
 $successMessage = "";
 $errors = [];
+$fieldErrors = [];
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (!csrf_validate($_POST['csrf_token'] ?? null)) {
@@ -66,97 +67,114 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $unit = null;
         $profile_picture = null;
 
-        // Comprehensive validation for multi-step form
+        // Comprehensive validation for multi-step form (field-scoped)
         if (empty($studentId)) {
-            $errors[] = "Please provide your Student ID to continue with registration.";
+            $fieldErrors['user_id'] = "Student ID is required.";
         } elseif (strlen($studentId) < 3) {
-            $errors[] = "Student ID must contain at least 3 characters for verification purposes.";
+            $fieldErrors['user_id'] = "Student ID must be at least 3 characters.";
         }
         
         if (empty($firstName)) {
-            $errors[] = "First name is required for your student profile.";
+            $fieldErrors['first_name'] = "First name is required.";
         }
         
         if (empty($lastName)) {
-            $errors[] = "Last name is required for your student profile.";
+            $fieldErrors['last_name'] = "Last name is required.";
         }
         
         if (empty($birthDate)) {
-            $errors[] = "Please provide your birth date for age verification.";
+            $fieldErrors['birth_date'] = "Birth date is required.";
         }
         
         if (empty($nationality)) {
-            $errors[] = "Please specify your nationality for enrollment records.";
+            $fieldErrors['nationality'] = "Nationality is required.";
         }
         
         if (empty($religion)) {
-            $errors[] = "Please indicate your religious affiliation for student records.";
+            $fieldErrors['religion'] = "Religion is required.";
         }
         
         if (empty($biologicalSex)) {
-            $errors[] = "Please specify your biological sex for demographic records.";
+            $fieldErrors['biological_sex'] = "Please select sex.";
         }
         
         if (empty($email)) {
-            $errors[] = "A valid email address is required for account verification and communication.";
+            $fieldErrors['email'] = "Email is required.";
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $errors[] = "Please enter a valid email address format (e.g., student@example.com).";
+            $fieldErrors['email'] = "Please enter a valid email address.";
         }
         
         if (empty($phone)) {
-            $errors[] = "Phone number is required for emergency contact purposes.";
+            $fieldErrors['phone'] = "Phone number is required.";
         } elseif (!preg_match('/^[\+]?[0-9\s\-\(\)]{10,}$/', $phone)) {
-            $errors[] = "Please enter a valid phone number format (e.g., +63 912 345 6789).";
+            $fieldErrors['phone'] = "Please enter a valid phone number.";
         }
         
         if (empty($currentAddress)) {
-            $errors[] = "Current address is required for student records and correspondence.";
+            $fieldErrors['current_address'] = "Current address is required.";
         }
         
         if (empty($permanentAddress)) {
-            $errors[] = "Permanent address is required for official student documentation.";
+            $fieldErrors['permanent_address'] = "Permanent address is required.";
         }
         
         if (empty($year)) {
-            $errors[] = "Please select your current year level for academic planning.";
+            $fieldErrors['year'] = "Please select your year level.";
         }
         
         if (empty($section)) {
-            $errors[] = "Please specify your section for class scheduling and organization.";
+            $fieldErrors['section'] = "Section is required.";
         }
         
         if (empty($course)) {
-            $errors[] = "Please select your enrolled course for academic tracking.";
+            $fieldErrors['course'] = "Course is required.";
         }
         
         if (!preg_match('/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/', $rawPassword)) { 
-            $errors[] = "Password must be at least 8 characters long and include uppercase letters, lowercase letters, and numbers for security."; 
+            $fieldErrors['password'] = "Password must be 8+ characters with uppercase, lowercase, and number."; 
         }
         if ($rawPassword !== $confirmPassword) {
-            $errors[] = "Password confirmation does not match. Please ensure both password fields are identical.";
+            $fieldErrors['confirmPassword'] = "Passwords do not match.";
         }
         if (!$terms) {
-            $errors[] = "You must accept the Terms of Service and Privacy Policy to create your account.";
+            $fieldErrors['terms'] = "You must accept the Terms and Privacy Policy.";
         }
 
         // Check if user already exists
-        if (!$errors) {
+        if (!$fieldErrors) {
             $checkStmt = $conn->prepare("SELECT user_id FROM users WHERE user_id = ? OR email = ?");
             if ($checkStmt) {
                 $checkStmt->bind_param("ss", $studentId, $email);
                 $checkStmt->execute();
                 $checkStmt->store_result();
                 if ($checkStmt->num_rows > 0) {
-                    $errors[] = "This Student ID or Email address is already registered. Please use different credentials or contact support if you believe this is an error.";
+                    // Determine which field conflicts if possible
+                    $dupStmt = $conn->prepare("SELECT user_id, email FROM users WHERE user_id = ? OR email = ? LIMIT 1");
+                    if ($dupStmt) {
+                        $dupStmt->bind_param("ss", $studentId, $email);
+                        $dupStmt->execute();
+                        $dupStmt->bind_result($existingUserId, $existingEmail);
+                        if ($dupStmt->fetch()) {
+                            if ($existingUserId === $studentId) {
+                                $fieldErrors['user_id'] = "This Student ID is already registered.";
+                            }
+                            if ($existingEmail === $email) {
+                                $fieldErrors['email'] = "This email is already registered.";
+                            }
+                        }
+                        $dupStmt->close();
+                    } else {
+                        $fieldErrors['user_id'] = "This Student ID or Email is already registered.";
+                    }
                 }
                 $checkStmt->close();
             } else {
-                $errors[] = "We're experiencing technical difficulties. Please try again in a few moments or contact our support team for assistance.";
+                $fieldErrors['user_id'] = "System error. Please try again shortly.";
             }
         }
 
         // If no errors, create user
-        if (!$errors) {
+        if (!$fieldErrors) {
             $password = password_hash($rawPassword, PASSWORD_DEFAULT);
             $stmt = $conn->prepare(
                 "INSERT INTO users
@@ -198,6 +216,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     $family_income
                 );
                 if ($stmt->execute()) {
+                    unset($_SESSION['form_errors']);
                     if (($_POST['source'] ?? '') === 'landing') {
                         $_SESSION['landing_success'] = 'Congratulations! Your account has been successfully created. You can now access all NEUST student services.';
                         header('Location: landing_page.php?open=login');
@@ -209,33 +228,95 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     }
                     exit;
                 } else {
-                    $errors[] = "Error saving record: " . $stmt->error;
+                    $fieldErrors['user_id'] = "Error saving record: " . $stmt->error;
                 }
                 $stmt->close();
             } else {
-                $errors[] = "System error. Please try again later.";
+                $fieldErrors['user_id'] = "System error. Please try again later.";
             }
         }
 
-        if (($_POST['source'] ?? '') === 'landing') {
-            $_SESSION['landing_error'] = end($errors);
-            header('Location: landing_page.php?open=register');
-            exit;
-        } elseif (($_POST['source'] ?? '') === 'registration_modal') {
-            $_SESSION['registration_error'] = end($errors);
-            header('Location: registration_modal.php?error=1');
-            exit;
+        // If there are field errors, persist them to the session (scoped to step and fields)
+        if ($fieldErrors) {
+            // Map fields to their corresponding steps
+            $fieldToStep = [
+                'user_id' => 1,
+                'first_name' => 1,
+                'middle_name' => 1,
+                'last_name' => 1,
+                'birth_date' => 1,
+                'nationality' => 1,
+                'religion' => 1,
+                'biological_sex' => 1,
+                'year' => 2,
+                'section' => 2,
+                'course' => 2,
+                'department' => 2,
+                'email' => 3,
+                'phone' => 3,
+                'current_address' => 3,
+                'permanent_address' => 3,
+                'password' => 4,
+                'confirmPassword' => 4,
+                'terms' => 4,
+            ];
+            $errorStep = 1;
+            foreach ($fieldErrors as $f => $_msg) {
+                if (isset($fieldToStep[$f])) {
+                    $errorStep = max($errorStep, $fieldToStep[$f]);
+                }
+            }
+
+            // Persist values (except sensitive)
+            $persistValues = [
+                'user_id' => $studentId,
+                'first_name' => $firstName,
+                'middle_name' => $middleName,
+                'last_name' => $lastName,
+                'birth_date' => $birthDate,
+                'nationality' => $nationality,
+                'religion' => $religion,
+                'biological_sex' => $biologicalSex,
+                'email' => $email,
+                'phone' => $phone,
+                'current_address' => $currentAddress,
+                'permanent_address' => $permanentAddress,
+                'year' => $year,
+                'section' => $section,
+                'course' => $course,
+                'department' => $department,
+            ];
+
+            $_SESSION['form_errors'] = [
+                'fields' => $fieldErrors,
+                'values' => $persistValues,
+                'step' => $errorStep,
+                'source' => ($_POST['source'] ?? ''),
+            ];
+
+            // Also set a generic error message for legacy display if needed
+            $genericError = reset($fieldErrors) ?: 'Please correct the highlighted fields.';
+
+            if (($_POST['source'] ?? '') === 'landing') {
+                $_SESSION['landing_error'] = is_string($genericError) ? $genericError : 'Please correct the highlighted fields.';
+                header('Location: landing_page.php?open=register');
+                exit;
+            } elseif (($_POST['source'] ?? '') === 'registration_modal') {
+                $_SESSION['registration_error'] = is_string($genericError) ? $genericError : 'Please correct the highlighted fields.';
+                header('Location: registration_modal.php?error=1');
+                exit;
+            }
         }
     }
 }
 
 // If we reach here, there was an error or it's not a POST request
 if (($_POST['source'] ?? '') === 'landing') {
-    $_SESSION['landing_error'] = end($errors) ?: "Registration failed. Please try again.";
+    $_SESSION['landing_error'] = end($errors) ?: (isset($_SESSION['form_errors']) ? 'Please correct the highlighted fields.' : "Registration failed. Please try again.");
     header('Location: landing_page.php?open=register');
     exit();
 } elseif (($_POST['source'] ?? '') === 'registration_modal') {
-    $_SESSION['registration_error'] = end($errors) ?: "Registration failed. Please try again.";
+    $_SESSION['registration_error'] = end($errors) ?: (isset($_SESSION['form_errors']) ? 'Please correct the highlighted fields.' : "Registration failed. Please try again.");
     header('Location: registration_modal.php?error=1');
     exit();
 } else {

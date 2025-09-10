@@ -16,6 +16,10 @@ $landingSuccess = $_SESSION['landing_success'] ?? '';
 if (isset($_SESSION['landing_error'])) unset($_SESSION['landing_error']);
 if (isset($_SESSION['landing_success'])) unset($_SESSION['landing_success']);
 
+// Structured form errors and persisted values for inline, step-scoped display
+$formErrors = $_SESSION['form_errors'] ?? null;
+if (isset($_SESSION['form_errors'])) unset($_SESSION['form_errors']);
+
 $sql = "SELECT * FROM announcements ORDER BY date_posted DESC";
 $result = $conn->query($sql);
 require_once __DIR__ . '/csrf.php';
@@ -996,6 +1000,12 @@ require_once __DIR__ . '/csrf.php';
             transition: all 0.2s ease;
             text-decoration: none;
         }
+        /* Map nav-btn to unified button styles */
+        .nav-btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.75rem 1.5rem; border-radius: 0.5rem; font-size: 0.875rem; font-weight: 600; cursor: pointer; border: none; }
+        .prev-btn { background: #f3f4f6; color: #374151; border: 1px solid #d1d5db; }
+        .prev-btn:hover { background: #e5e7eb; }
+        .next-btn, .submit-btn { background: linear-gradient(135deg, #021f3d 0%, #0a3a6b 50%, #d4af37 100%); color: #fff; box-shadow: 0 2px 4px rgba(2,31,61,.2); }
+        .next-btn:hover, .submit-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(2,31,61,.3); }
         
         .btn-primary {
             background: linear-gradient(135deg, #021f3d 0%, #0a3a6b 50%, #d4af37 100%);
@@ -1023,6 +1033,21 @@ require_once __DIR__ . '/csrf.php';
             cursor: not-allowed;
             transform: none !important;
         }
+        /* Login button unify */
+        .login-btn { background: linear-gradient(135deg, #021f3d 0%, #0a3a6b 50%, #d4af37 100%); color: #fff; border: none; border-radius: 8px; padding: 12px 16px; font-weight: 600; width: 100%; box-shadow: 0 2px 4px rgba(2,31,61,.2); cursor: pointer; }
+        .login-btn:hover { transform: translateY(-1px); box-shadow: 0 4px 8px rgba(2,31,61,.3); }
+        .login-btn:disabled { opacity: .6; cursor: not-allowed; }
+
+        /* Sidebar progress tracker consistency */
+        .registration-sidebar .progress-tracker h4 { color: #fff; font-weight: 800; margin-bottom: 12px; }
+        .registration-sidebar .progress-steps { display: flex; flex-direction: column; gap: 10px; position: relative; }
+        .registration-sidebar .progress-step { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 10px; transition: background .2s ease, transform .2s ease; }
+        .registration-sidebar .progress-step .step-indicator { display: flex; align-items: center; gap: 10px; }
+        .registration-sidebar .progress-step .step-number { width: 36px; height: 36px; border-radius: 50%; background: rgba(255,255,255,.25); color: #fff; font-weight: 800; display: inline-flex; align-items: center; justify-content: center; }
+        .registration-sidebar .progress-step.active .step-number { background: #d4af37; color: #021f3d; }
+        .registration-sidebar .progress-step.completed .step-number { background: #10b981; color: #fff; }
+        .registration-sidebar .progress-step .step-content h5 { margin: 0; color: #fff; font-weight: 700; font-size: 0.95rem; }
+        .registration-sidebar .progress-step .step-content p { margin: 0; color: rgba(255,255,255,.8); font-size: 0.8rem; }
         
         /* Responsive Design */
         @media (max-width: 768px) {
@@ -1055,6 +1080,30 @@ require_once __DIR__ . '/csrf.php';
                 justify-content: center;
             }
         }
+    </style>
+    <style>
+        :root { --neust-primary:#021f3d; --neust-primary-600:#0a3a6b; --neust-gold:#d4af37; --neust-gray-200:#e5e7eb; --neust-gray-500:#6b7280; --neust-gray-700:#374151; --radius-md:8px; }
+        .progress-steps { gap: 12px; }
+        .progress-steps::before { left: 40px; right: 40px; background: var(--neust-gray-200); }
+        .step-number { background: var(--neust-gray-200); color: var(--neust-gray-500); font-weight:700; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+        .step.active .step-number { background: linear-gradient(135deg, var(--neust-primary) 0%, var(--neust-primary-600) 50%, var(--neust-gold) 100%); }
+        .step-label { font-weight:600; color: var(--neust-gray-500); }
+        .step.active .step-label { color: var(--neust-primary); font-weight:700; }
+        .form-label { font-weight:600; color: var(--neust-gray-700); }
+        .input-wrapper .input-icon { display:none; }
+        .input-wrapper .password-toggle { position:absolute; right:10px; top:50%; transform:translateY(-50%); background:none; border:0; color: var(--neust-gray-500); cursor:pointer; }
+        .field-error { color:#dc2626; font-size:12px; margin-top:4px; }
+        .form-input, .registration-input, .auth-input, .form-select, textarea.form-input { width:100%; padding:12px 14px; border:2px solid var(--neust-gray-200); border-radius: var(--radius-md); font-size:.95rem; color: var(--neust-gray-700); }
+        .form-input:focus, .registration-input:focus, .auth-input:focus, .form-select:focus, textarea.form-input:focus { outline:none; border-color: var(--neust-gold); box-shadow:0 0 0 3px rgba(212,175,55,.15); }
+        .form-input.error, .registration-input.error, .auth-input.error { border-color:#dc2626; box-shadow:0 0 0 3px rgba(220,38,38,.1); }
+        .form-input.valid, .registration-input.valid, .auth-input.valid { border-color:#10b981; box-shadow:0 0 0 3px rgba(16,185,129,.1); }
+        .checkbox-wrapper { display:inline-flex; align-items:center; gap:8px; cursor:pointer; }
+        .checkbox-wrapper input[type="checkbox"] { width:18px; height:18px; accent-color: var(--neust-gold); }
+        .forgot-link { color: var(--neust-primary-600); font-weight:600; }
+        .forgot-link:hover { color: var(--neust-primary); text-decoration: underline; }
+        .terms-link { color: var(--neust-gold); font-weight:600; text-decoration:none; }
+        .terms-link:hover { color:#c19d2e; text-decoration: underline; }
+        .form-navigation { gap:.75rem; margin-top:1.5rem; }
     </style>
     <!-- Auth Split Overlay -->
     <div class="auth-overlay" id="authOverlay" aria-hidden="true">
@@ -1101,7 +1150,6 @@ require_once __DIR__ . '/csrf.php';
                             <div class="form-group">
                                 <label for="loginUserId" class="form-label">User ID</label>
                                 <div class="input-wrapper">
-                                    <i class="fas fa-user input-icon"></i>
                                     <input 
                                         class="form-input" 
                                         type="text" 
@@ -1118,7 +1166,6 @@ require_once __DIR__ . '/csrf.php';
                             <div class="form-group">
                                 <label for="loginPwd" class="form-label">Password</label>
                                 <div class="input-wrapper">
-                                    <i class="fas fa-lock input-icon"></i>
                                     <input 
                                         class="form-input" 
                                         type="password" 
@@ -1136,9 +1183,8 @@ require_once __DIR__ . '/csrf.php';
                             </div>
 
                             <div class="form-options">
-                                <label class="checkbox-wrapper">
+                                <label class="checkbox-wrapper" for="rememberMe">
                                     <input type="checkbox" name="remember_me" id="rememberMe">
-                                    <span class="checkmark"></span>
                                     <span class="checkbox-label">Remember me</span>
                                 </label>
                                 <a href="reset_password.php" class="forgot-link">Forgot password?</a>
@@ -1230,7 +1276,7 @@ require_once __DIR__ . '/csrf.php';
                                 <p class="registration-subtitle">Join thousands of NEUST students</p>
                             </div>
 
-                            <?php if (!empty($landingError) && $openPane === 'register'): ?>
+                            <?php if (!empty($landingError) && $openPane === 'register' && empty($formErrors)): ?>
                               <div class="alert alert-error">
                                 <i class="fas fa-exclamation-circle"></i>
                                 <span><?= htmlspecialchars($landingError) ?></span>
@@ -1243,7 +1289,7 @@ require_once __DIR__ . '/csrf.php';
                               </div>
                             <?php endif; ?>
 
-                            <form class="registration-form" method="POST" action="process_register.php" id="registerMultiStep">
+                            <form class="registration-form" method="POST" action="process_register.php" id="registerMultiStep" <?php if (!empty($formErrors) && ($formErrors['source'] ?? '') === 'landing'): ?>data-initial-step="<?= (int)($formErrors['step'] ?? 1) ?>"<?php endif; ?>>
                                 <input type="hidden" name="csrf_token" value="<?= htmlspecialchars(csrf_token(), ENT_QUOTES) ?>">
                                 <input type="hidden" name="source" value="landing">
                                 
@@ -1670,10 +1716,53 @@ require_once __DIR__ . '/csrf.php';
             let currentStep = 1;
             const totalSteps = steps.length;
             
-            // Initialize form
+            // Initialize with server-provided error state if present
+            const initialStepAttr = form.getAttribute('data-initial-step');
+            if (initialStepAttr) {
+                const stepNum = parseInt(initialStepAttr, 10);
+                if (!isNaN(stepNum) && stepNum >= 1 && stepNum <= totalSteps) {
+                    currentStep = stepNum;
+                }
+            }
+
+            // Apply server-side field errors and persisted values
+            <?php if (!empty($formErrors) && ($formErrors['source'] ?? '') === 'landing'): ?>
+            const serverErrors = <?= json_encode($formErrors['fields'] ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
+            const serverValues = <?= json_encode($formErrors['values'] ?? [], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) ?>;
+            Object.keys(serverValues || {}).forEach(function(name){
+                const field = form.querySelector('[name="' + name + '"]');
+                if (field && field.type !== 'password' && field.tagName !== 'TEXTAREA') {
+                    field.value = serverValues[name];
+                } else if (field && field.tagName === 'TEXTAREA') {
+                    field.textContent = serverValues[name];
+                }
+            });
+            Object.keys(serverErrors || {}).forEach(function(name){
+                const field = form.querySelector('[name="' + name + '"]');
+                if (!field) return;
+                field.classList.add('error');
+                let holder = field.parentNode;
+                if (holder) {
+                    let e = holder.querySelector('.field-error');
+                    if (!e) {
+                        e = document.createElement('div');
+                        e.className = 'field-error';
+                        holder.appendChild(e);
+                    }
+                    e.textContent = serverErrors[name];
+                }
+            });
+            <?php endif; ?>
+
             updateStepDisplay();
             updateProgress();
             
+            // Jump to initial step if provided
+            if (currentStep > 1) {
+                updateStepDisplay();
+                updateProgress();
+            }
+
             // Next button handler
             if (nextBtn) {
                 nextBtn.addEventListener('click', function() {
@@ -1712,10 +1801,18 @@ require_once __DIR__ . '/csrf.php';
             progressSteps.forEach((step, index) => {
                 step.addEventListener('click', function() {
                     const stepNumber = parseInt(this.getAttribute('data-step'));
-                    if (stepNumber <= currentStep || this.classList.contains('completed')) {
+                    // Allow navigating back and to already completed steps; block jumping forward past validation
+                    if (stepNumber <= currentStep) {
                         currentStep = stepNumber;
                         updateStepDisplay();
                         updateProgress();
+                    } else {
+                        // If trying to jump ahead, validate current step first
+                        if (validateCurrentStep()) {
+                            currentStep = stepNumber;
+                            updateStepDisplay();
+                            updateProgress();
+                        }
                     }
                 });
             });
@@ -1847,14 +1944,18 @@ require_once __DIR__ . '/csrf.php';
                     field.classList.add(isValid ? 'valid' : 'error');
                 }
                 
-                // Show/hide error message
-                let errorElement = field.parentNode.querySelector('.field-error');
+                // Show/hide error message scoped to input-wrapper parent
+                let holder = field.parentNode;
+                if (holder && !holder.classList.contains('input-wrapper')) {
+                    holder = holder.querySelector('.input-wrapper') || holder;
+                }
+                let errorElement = holder.querySelector ? holder.querySelector('.field-error') : null;
                 if (!isValid && errorMessage) {
                     if (!errorElement) {
                         errorElement = document.createElement('div');
                         errorElement.className = 'field-error';
                         errorElement.style.cssText = 'color: #dc2626; font-size: 0.75rem; margin-top: 0.25rem;';
-                        field.parentNode.appendChild(errorElement);
+                        holder.appendChild(errorElement);
                     }
                     errorElement.textContent = errorMessage;
                 } else if (errorElement) {
