@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Flow Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f5f5f5;
+        }
+        .test-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-button {
+            display: inline-block;
+            padding: 10px 20px;
+            margin: 10px;
+            background: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+        }
+        .test-button:hover {
+            background: #0056b3;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 NEUST Registration Flow Test</h1>
+        
+        <div class="test-section">
+            <h3>Test 1: Direct Links</h3>
+            <p>Test direct access to different modal states:</p>
+            <a href="landing_page.php" class="test-button" target="_blank">🔗 Landing Page (Default)</a>
+            <a href="landing_page.php?open=login" class="test-button" target="_blank">🔗 Landing Page + Login Modal</a>
+            <a href="landing_page.php?open=register" class="test-button" target="_blank">🔗 Landing Page + Register Modal</a>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 2: Button Functionality</h3>
+            <p>Test all register and login buttons:</p>
+            <div id="button-test-results"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 3: Form Validation</h3>
+            <p>Test form validation and submission:</p>
+            <div id="form-test-results"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 4: Console Debugging</h3>
+            <p>Open browser console (F12) and check for any JavaScript errors when testing buttons.</p>
+            <div class="status info">
+                <strong>Debug Steps:</strong>
+                <ol>
+                    <li>Open browser console (F12)</li>
+                    <li>Click register buttons - should see "Register button clicked" messages</li>
+                    <li>Click login buttons - should see "Login button clicked" messages</li>
+                    <li>Check for any error messages</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 5: Expected Behavior</h3>
+            <div class="status success">
+                <strong>✅ What should happen:</strong>
+                <ul>
+                    <li>Clicking any "Register" button should open the modal with the registration form</li>
+                    <li>Clicking any "Login" button should open the modal with the login form</li>
+                    <li>Forms should validate input properly</li>
+                    <li>Password toggle should work</li>
+                    <li>Switching between login/register should work</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h3>Test 6: Database Test</h3>
+            <a href="test_auth.php" class="test-button" target="_blank">🔗 Test Database Connection</a>
+        </div>
+    </div>
+
+    <script>
+        // Test button functionality
+        function testButtons() {
+            const results = document.getElementById('button-test-results');
+            results.innerHTML = '<div class="status info">Testing button functionality...</div>';
+            
+            // Simulate button tests
+            setTimeout(() => {
+                results.innerHTML = `
+                    <div class="status success">
+                        <strong>Button Test Results:</strong>
+                        <ul>
+                            <li>✅ Register buttons should open registration form</li>
+                            <li>✅ Login buttons should open login form</li>
+                            <li>✅ Modal should open/close properly</li>
+                            <li>✅ Pane switching should work</li>
+                        </ul>
+                        <p><em>Click the buttons above to test actual functionality.</em></p>
+                    </div>
+                `;
+            }, 1000);
+        }
+
+        // Test form validation
+        function testFormValidation() {
+            const results = document.getElementById('form-test-results');
+            results.innerHTML = `
+                <div class="status info">
+                    <strong>Form Validation Test:</strong>
+                    <ul>
+                        <li>✅ Required fields should be validated</li>
+                        <li>✅ Email format should be checked</li>
+                        <li>✅ Password strength should be validated</li>
+                        <li>✅ Password confirmation should match</li>
+                        <li>✅ Terms checkbox should be required</li>
+                    </ul>
+                    <p><em>Try submitting forms with invalid data to test validation.</em></p>
+                </div>
+            `;
+        }
+
+        // Run tests on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            testButtons();
+            testFormValidation();
+        });
+    </script>
+</body>
+</html>

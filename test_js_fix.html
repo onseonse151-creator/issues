@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript Fix Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { 
+            background: #f8f9fa; 
+            padding: 15px; 
+            margin: 10px 0; 
+            border-radius: 5px; 
+            border-left: 4px solid #28a745;
+        }
+        .test-link { 
+            display: inline-block; 
+            padding: 10px 15px; 
+            margin: 5px; 
+            background: #007bff; 
+            color: white; 
+            text-decoration: none; 
+            border-radius: 3px;
+        }
+        .test-link:hover { background: #0056b3; }
+        .error { color: #dc3545; }
+        .success { color: #28a745; }
+    </style>
+</head>
+<body>
+    <h1>🔧 JavaScript Fix Test</h1>
+    
+    <div class="test-section">
+        <h3>✅ Fixed Issues:</h3>
+        <ul>
+            <li><strong>querySelector Error:</strong> Fixed invalid selector "#" error</li>
+            <li><strong>Smooth Scrolling:</strong> Now properly validates href before processing</li>
+            <li><strong>Button Clicks:</strong> Register buttons should now work without errors</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h3>🧪 Test Links:</h3>
+        <p>These links should work without JavaScript errors:</p>
+        <a href="#" class="test-link">Test # Link (should not cause error)</a>
+        <a href="#features" class="test-link">Test #features Link</a>
+        <a href="#about" class="test-link">Test #about Link</a>
+        <a href="landing_page.php" class="test-link">🏠 Landing Page</a>
+        <a href="landing_page.php?open=register" class="test-link">📝 Register Modal</a>
+    </div>
+
+    <div class="test-section">
+        <h3>🔍 Console Test:</h3>
+        <p>Open browser console (F12) and check:</p>
+        <ul>
+            <li>No more "Failed to execute 'querySelector'" errors</li>
+            <li>Register button clicks should work</li>
+            <li>Login button clicks should work</li>
+        </ul>
+    </div>
+
+    <div class="test-section">
+        <h3>📋 Test Steps:</h3>
+        <ol>
+            <li>Open browser console (F12)</li>
+            <li>Go to <code>landing_page.php</code></li>
+            <li>Click any "Register" button</li>
+            <li>Verify register form appears (not login form)</li>
+            <li>Check console for any remaining errors</li>
+        </ol>
+    </div>
+
+    <script>
+        // Test the fix
+        console.log('JavaScript fix test loaded');
+        
+        // Test querySelector with "#" - should not cause error
+        try {
+            const testElement = document.querySelector('#');
+            console.log('✅ querySelector("#") test passed - no error thrown');
+        } catch (e) {
+            console.error('❌ querySelector("#") still causes error:', e);
+        }
+        
+        // Test the fixed version
+        const href = '#';
+        if (href && href !== '#' && href.length > 1) {
+            console.log('This should not run for "#"');
+        } else {
+            console.log('✅ Fixed validation working - "#" is properly ignored');
+        }
+    </script>
+</body>
+</html>

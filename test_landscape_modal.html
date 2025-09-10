@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🖥️ Landscape Modal Test</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background: linear-gradient(135deg, #021f3d 0%, #0a3a6b 50%, #d4af37 100%);
+            min-height: 100vh;
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            background: white; 
+            border-radius: 15px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        .header { 
+            background: linear-gradient(135deg, #021f3d 0%, #0a3a6b 50%, #d4af37 100%);
+            color: white; 
+            padding: 2rem; 
+            text-align: center; 
+        }
+        .header h1 { margin: 0; font-size: 2.5rem; }
+        .header p { margin: 0.5rem 0 0; opacity: 0.9; }
+        .content { padding: 2rem; }
+        .feature-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 2rem; 
+            margin-bottom: 2rem; 
+        }
+        .feature-card { 
+            background: #f8f9fa; 
+            padding: 1.5rem; 
+            border-radius: 10px; 
+            border-left: 4px solid #d4af37;
+            transition: transform 0.2s ease;
+        }
+        .feature-card:hover { transform: translateY(-2px); }
+        .feature-card h3 { 
+            color: #021f3d; 
+            margin-top: 0; 
+            display: flex; 
+            align-items: center; 
+            gap: 0.5rem; 
+        }
+        .feature-card h3 i { color: #d4af37; }
+        .test-section { 
+            background: #e8f5e8; 
+            padding: 1.5rem; 
+            border-radius: 10px; 
+            margin: 1rem 0; 
+            border: 1px solid #4caf50;
+        }
+        .test-section h3 { color: #2e7d32; margin-top: 0; }
+        .btn { 
+            display: inline-block; 
+            padding: 12px 24px; 
+            background: linear-gradient(135deg, #021f3d 0%, #0a3a6b 50%, #d4af37 100%);
+            color: white; 
+            text-decoration: none; 
+            border-radius: 8px; 
+            font-weight: 500; 
+            transition: all 0.2s ease;
+            margin: 0.5rem;
+        }
+        .btn:hover { 
+            transform: translateY(-2px); 
+            box-shadow: 0 4px 12px rgba(2, 31, 61, 0.3);
+        }
+        .btn-secondary { 
+            background: #6c757d; 
+        }
+        .btn-success { 
+            background: #28a745; 
+        }
+        .layout-preview { 
+            display: grid; 
+            grid-template-columns: 1fr 1.5fr; 
+            gap: 1rem; 
+            margin: 2rem 0; 
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .layout-left { 
+            background: linear-gradient(135deg, #021f3d 0%, #0a3a6b 50%, #d4af37 100%);
+            color: white; 
+            padding: 1.5rem; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center;
+        }
+        .layout-right { 
+            background: #f8f9fa; 
+            padding: 1.5rem; 
+        }
+        .layout-title { 
+            font-size: 1.5rem; 
+            font-weight: 700; 
+            margin-bottom: 1rem; 
+        }
+        .layout-subtitle { 
+            opacity: 0.8; 
+            margin-bottom: 1.5rem; 
+        }
+        .progress-step { 
+            display: flex; 
+            align-items: center; 
+            gap: 1rem; 
+            padding: 0.75rem; 
+            background: rgba(255, 255, 255, 0.1); 
+            border-radius: 8px; 
+            margin-bottom: 0.5rem; 
+        }
+        .progress-step.active { 
+            background: rgba(255, 255, 255, 0.2); 
+        }
+        .step-number { 
+            width: 30px; 
+            height: 30px; 
+            border-radius: 50%; 
+            background: rgba(255, 255, 255, 0.2); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-weight: 600; 
+        }
+        .step-content h4 { 
+            margin: 0 0 0.25rem; 
+            font-size: 0.875rem; 
+        }
+        .step-content p { 
+            margin: 0; 
+            font-size: 0.75rem; 
+            opacity: 0.7; 
+        }
+        .form-preview { 
+            background: white; 
+            padding: 1rem; 
+            border-radius: 8px; 
+            border: 1px solid #e9ecef;
+        }
+        .form-preview h4 { 
+            color: #021f3d; 
+            margin-top: 0; 
+        }
+        .form-field { 
+            margin-bottom: 0.75rem; 
+        }
+        .form-field input { 
+            width: 100%; 
+            padding: 0.5rem; 
+            border: 1px solid #e9ecef; 
+            border-radius: 4px; 
+        }
+        .highlight { 
+            background: #fff3cd; 
+            padding: 1rem; 
+            border-radius: 8px; 
+            border-left: 4px solid #ffc107; 
+            margin: 1rem 0; 
+        }
+        .highlight h4 { 
+            color: #856404; 
+            margin-top: 0; 
+        }
+        .improvement-list { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); 
+            gap: 1rem; 
+            margin: 1rem 0; 
+        }
+        .improvement-item { 
+            background: #fff; 
+            padding: 1rem; 
+            border-radius: 8px; 
+            border: 1px solid #e9ecef; 
+            display: flex; 
+            align-items: center; 
+            gap: 0.75rem; 
+        }
+        .improvement-item i { 
+            color: #28a745; 
+            font-size: 1.2rem; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🖥️ Landscape Modal Design</h1>
+            <p>Professional Side-by-Side Layout for Better User Experience</p>
+        </div>
+        
+        <div class="content">
+            <div class="highlight">
+                <h4>✨ New Landscape Layout:</h4>
+                <p>Redesigned registration modal with side-by-side layout featuring progress tracking on the left and form content on the right for optimal user experience.</p>
+            </div>
+
+            <div class="layout-preview">
+                <div class="layout-left">
+                    <div class="layout-title">Registration Progress</div>
+                    <div class="layout-subtitle">Track your progress</div>
+                    
+                    <div class="progress-step active">
+                        <div class="step-number">1</div>
+                        <div class="step-content">
+                            <h4>Personal Information</h4>
+                            <p>Basic details and demographics</p>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-step">
+                        <div class="step-number">2</div>
+                        <div class="step-content">
+                            <h4>Academic Details</h4>
+                            <p>Course and year information</p>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-step">
+                        <div class="step-number">3</div>
+                        <div class="step-content">
+                            <h4>Contact Information</h4>
+                            <p>Address and phone details</p>
+                        </div>
+                    </div>
+                    
+                    <div class="progress-step">
+                        <div class="step-number">4</div>
+                        <div class="step-content">
+                            <h4>Account Security</h4>
+                            <p>Password and terms agreement</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="layout-right">
+                    <div class="form-preview">
+                        <h4>Registration Form</h4>
+                        <div class="form-field">
+                            <input type="text" placeholder="Student ID" />
+                        </div>
+                        <div class="form-field">
+                            <input type="text" placeholder="First Name" />
+                        </div>
+                        <div class="form-field">
+                            <input type="text" placeholder="Last Name" />
+                        </div>
+                        <div class="form-field">
+                            <input type="email" placeholder="Email Address" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3><i class="fas fa-desktop"></i> Landscape Layout</h3>
+                    <p><strong>Side-by-Side Design:</strong></p>
+                    <ul>
+                        <li>Left: Progress tracking and branding</li>
+                        <li>Right: Form content and navigation</li>
+                        <li>Better space utilization</li>
+                        <li>Professional appearance</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h3><i class="fas fa-chart-line"></i> Enhanced Progress</h3>
+                    <p><strong>Visual Progress Tracking:</strong></p>
+                    <ul>
+                        <li>Detailed step descriptions</li>
+                        <li>Active/completed states</li>
+                        <li>Real-time progress updates</li>
+                        <li>Clear visual hierarchy</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h3><i class="fas fa-mobile-alt"></i> Responsive Design</h3>
+                    <p><strong>Mobile Optimization:</strong></p>
+                    <ul>
+                        <li>Stacks vertically on mobile</li>
+                        <li>Optimized touch interactions</li>
+                        <li>Maintains usability</li>
+                        <li>Adaptive layout</li>
+                    </ul>
+                </div>
+
+                <div class="feature-card">
+                    <h3><i class="fas fa-palette"></i> Professional Styling</h3>
+                    <p><strong>Modern Design:</strong></p>
+                    <ul>
+                        <li>NEUST brand colors</li>
+                        <li>Gradient backgrounds</li>
+                        <li>Smooth animations</li>
+                        <li>Glass morphism effects</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3>🧪 Test the Landscape Modal</h3>
+                <p>Experience the new side-by-side registration layout:</p>
+                
+                <a href="landing_page.php?open=register" class="btn">
+                    <i class="fas fa-user-plus"></i> Test Landscape Registration
+                </a>
+                
+                <a href="landing_page.php" class="btn btn-secondary">
+                    <i class="fas fa-home"></i> Landing Page
+                </a>
+                
+                <a href="test_modal_improvements.html" class="btn btn-success">
+                    <i class="fas fa-cog"></i> Modal Improvements
+                </a>
+            </div>
+
+            <div class="test-section">
+                <h3>📱 Layout Improvements</h3>
+                <div class="improvement-list">
+                    <div class="improvement-item">
+                        <i class="fas fa-check"></i>
+                        <span>Landscape orientation for desktop</span>
+                    </div>
+                    <div class="improvement-item">
+                        <i class="fas fa-check"></i>
+                        <span>Enhanced progress visualization</span>
+                    </div>
+                    <div class="improvement-item">
+                        <i class="fas fa-check"></i>
+                        <span>Better space utilization</span>
+                    </div>
+                    <div class="improvement-item">
+                        <i class="fas fa-check"></i>
+                        <span>Professional side-by-side layout</span>
+                    </div>
+                    <div class="improvement-item">
+                        <i class="fas fa-check"></i>
+                        <span>Mobile responsive stacking</span>
+                    </div>
+                    <div class="improvement-item">
+                        <i class="fas fa-check"></i>
+                        <span>Improved visual hierarchy</span>
+                    </div>
+                    <div class="improvement-item">
+                        <i class="fas fa-check"></i>
+                        <span>Better user flow</span>
+                    </div>
+                    <div class="improvement-item">
+                        <i class="fas fa-check"></i>
+                        <span>Enhanced branding presence</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="test-section">
+                <h3>🔧 Technical Features</h3>
+                <ul>
+                    <li><strong>Flexbox Layout:</strong> Responsive side-by-side design with proper flex ratios</li>
+                    <li><strong>Progress Tracking:</strong> Real-time step updates with visual feedback</li>
+                    <li><strong>Scrollable Content:</strong> Right section scrolls independently for long forms</li>
+                    <li><strong>Mobile Adaptation:</strong> Stacks vertically on smaller screens</li>
+                    <li><strong>Brand Integration:</strong> NEUST colors and styling throughout</li>
+                    <li><strong>Accessibility:</strong> Proper ARIA labels and keyboard navigation</li>
+                </ul>
+            </div>
+
+            <div class="highlight">
+                <h4>🚀 Ready to Experience!</h4>
+                <p>The registration modal now features a professional landscape layout with enhanced progress tracking and better user flow. Click the test button above to see the new design in action!</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
